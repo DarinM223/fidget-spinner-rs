@@ -16,6 +16,9 @@ use shader::Shader;
 use sprite_renderer::{RenderOptions, SpriteRenderer};
 use texture::{Dimensions, Texture, TextureOptions};
 
+pub const SPINNER_WIDTH: f32 = 500.;
+pub const SPINNER_HEIGHT: f32 = 500.;
+
 fn main() {
     let events_loop = glutin::EventsLoop::new();
     let window = glutin::WindowBuilder::new()
@@ -33,38 +36,58 @@ fn main() {
     shader.use_program();
     shader.set_int("image", 0);
     shader.set_mat4("projection", projection);
-    gl_check!();
 
     let mut opts = TextureOptions::default();
     opts.internal_format = gl::RGBA as i32;
     opts.image_format = gl::RGBA as u32;
     let texture = Texture::new("./textures/fidget_spinner.png", Dimensions::Image, opts);
     let renderer = SpriteRenderer::new(&shader);
-    gl_check!();
 
     let mut render_opts = RenderOptions {
-        position: Vector2::new(200., 200.),
-        size: Vector2::new(300., 400.),
-        rotate: 45.,
+        position: Vector2::new(width as f32 / 2. - SPINNER_WIDTH / 2.,
+                               height as f32 / 2. - SPINNER_HEIGHT / 2.),
+        size: Vector2::new(SPINNER_WIDTH, SPINNER_HEIGHT),
+        rotate: 0.,
         color: Vector3::new(0., 1., 0.),
     };
 
+    let mut running = true;
+    let mut spinning = false;
+    let mut pressed = false;
 
-    events_loop.run_forever(|event| {
+    while running {
         unsafe {
             gl::ClearColor(0.0, 0.0, 0.0, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
         }
-        renderer.draw(&texture, &render_opts);
-        gl_check!();
+        if spinning {
+            render_opts.rotate += 3.;
+            if render_opts.rotate >= 360. {
+                render_opts.rotate -= 360.;
+            }
+        }
 
+        renderer.draw(&texture, &render_opts);
         window.swap_buffers().unwrap();
 
-        match event {
-            glutin::Event::WindowEvent { event: glutin::WindowEvent::Closed, .. } => {
-                events_loop.interrupt();
+        events_loop.poll_events(|event| {
+            match event {
+                glutin::Event::WindowEvent { event, .. } => {
+                    match event {
+                        glutin::WindowEvent::MouseInput(glutin::ElementState::Pressed, ..) => {
+                            if !pressed {
+                                pressed = true;
+                                spinning = !spinning;
+                            }
+                        }
+                        glutin::WindowEvent::MouseInput(glutin::ElementState::Released, ..) => {
+                            pressed = false;
+                        }
+                        glutin::WindowEvent::Closed => running = false,
+                        _ => {}
+                    }
+                }
             }
-            _ => {}
-        }
-    });
+        });
+    }
 }
