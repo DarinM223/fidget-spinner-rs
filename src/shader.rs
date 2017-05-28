@@ -69,6 +69,14 @@ impl Shader {
         unsafe { gl::UseProgram(self.program) };
     }
 
+    pub fn set_int(&self, name: &str, value: GLint) {
+        let name = CString::new(name.as_bytes()).unwrap();
+        unsafe {
+            let location = gl::GetUniformLocation(self.program, name.as_ptr());
+            gl::Uniform1i(location, value);
+        }
+    }
+
     pub fn set_mat4(&self, name: &str, mat: Matrix4<GLfloat>) {
         let name = CString::new(name.as_bytes()).unwrap();
         let matrix: [[GLfloat; 4]; 4] = mat.into();
