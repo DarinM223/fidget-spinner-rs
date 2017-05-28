@@ -2,6 +2,7 @@ extern crate cgmath;
 extern crate gl;
 extern crate glutin;
 extern crate png;
+extern crate time;
 
 #[macro_use]
 mod debug;
@@ -14,12 +15,46 @@ use debug::gl_check;
 use gl::types::*;
 use shader::Shader;
 use sprite_renderer::{RenderOptions, SpriteRenderer};
+use std::env;
 use texture::{Dimensions, Texture, TextureOptions};
 
 pub const SPINNER_WIDTH: f32 = 500.;
 pub const SPINNER_HEIGHT: f32 = 500.;
+pub const SPINNER_VELOCITY: f32 = 0.000001;
+
+pub enum FidgetType {
+    Black,
+    Green,
+    Yellow,
+}
+
+impl FidgetType {
+    pub fn path(&self) -> &'static str {
+        match *self {
+            FidgetType::Black => "./textures/fidget-spinner-black.png",
+            FidgetType::Green => "./textures/fidget-spinner-green.png",
+            FidgetType::Yellow => "./textures/fidget-spinner-yellow.png",
+        }
+    }
+}
 
 fn main() {
+    let args: Vec<_> = env::args().collect();
+    if args.len() < 2 {
+        println!("Need to specify the color of the fidget spinner (black, yellow, or green)");
+        return;
+    }
+
+    let spinner_type = match args[1].as_str() {
+        "black" => FidgetType::Black,
+        "green" => FidgetType::Green,
+        "yellow" => FidgetType::Yellow,
+        _ => {
+            println!("Invalid color type (not black, yellow, or green)");
+            return;
+        }
+    };
+
     let events_loop = glutin::EventsLoop::new();
     let window = glutin::WindowBuilder::new()
         .with_dimensions(800, 600)
@@ -40,7 +75,7 @@ fn main() {
     let mut opts = TextureOptions::default();
     opts.internal_format = gl::RGBA as i32;
     opts.image_format = gl::RGBA as u32;
-    let texture = Texture::new("./textures/fidget_spinner.png", Dimensions::Image, opts);
+    let texture = Texture::new(spinner_type.path(), Dimensions::Image, opts);
     let renderer = SpriteRenderer::new(&shader);
 
     let mut render_opts = RenderOptions {
@@ -54,14 +89,21 @@ fn main() {
     let mut running = true;
     let mut spinning = false;
     let mut pressed = false;
+    let mut dt;
+    let mut last_time = 0;
 
     while running {
+        let curr_time = time::precise_time_ns();
+        dt = curr_time - last_time;
+        last_time = curr_time;
+
         unsafe {
             gl::ClearColor(0.0, 0.0, 0.0, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
         }
         if spinning {
-            render_opts.rotate += 3.;
+            let velocity = SPINNER_VELOCITY * (dt as f32);
+            render_opts.rotate += velocity;
             if render_opts.rotate >= 360. {
                 render_opts.rotate -= 360.;
             }
