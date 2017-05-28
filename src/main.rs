@@ -17,7 +17,11 @@ use sprite_renderer::{RenderOptions, SpriteRenderer};
 use texture::{Dimensions, Texture, TextureOptions};
 
 fn main() {
-    let window = glutin::Window::new().unwrap();
+    let events_loop = glutin::EventsLoop::new();
+    let window = glutin::WindowBuilder::new()
+        .with_dimensions(800, 600)
+        .build(&events_loop)
+        .unwrap();
     unsafe { window.make_current() }.unwrap();
 
     gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
@@ -31,7 +35,9 @@ fn main() {
     shader.set_mat4("projection", projection);
     gl_check!();
 
-    let opts = TextureOptions::default();
+    let mut opts = TextureOptions::default();
+    opts.internal_format = gl::RGBA as i32;
+    opts.image_format = gl::RGBA as u32;
     let texture = Texture::new("./textures/fidget_spinner.png", Dimensions::Image, opts);
     let renderer = SpriteRenderer::new(&shader);
     gl_check!();
@@ -43,16 +49,22 @@ fn main() {
         color: Vector3::new(0., 1., 0.),
     };
 
-    for event in window.wait_events() {
+
+    events_loop.run_forever(|event| {
         unsafe {
-            gl::ClearColor(0.3, 0.3, 0.3, 1.0);
+            gl::ClearColor(0.0, 0.0, 0.0, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
         }
         renderer.draw(&texture, &render_opts);
         gl_check!();
 
-        if let glutin::Event::Closed = event {
-            break;
+        window.swap_buffers().unwrap();
+
+        match event {
+            glutin::Event::WindowEvent { event: glutin::WindowEvent::Closed, .. } => {
+                events_loop.interrupt();
+            }
+            _ => {}
         }
-    }
+    });
 }

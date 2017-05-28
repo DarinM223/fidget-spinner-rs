@@ -1,8 +1,7 @@
 use gl;
-use gl::types::*;
 
 pub fn gl_check(file: &str, line: u32) {
-    let mut error_code = 0;
+    let mut error_code;
     loop {
         error_code = unsafe { gl::GetError() };
         if error_code == gl::NO_ERROR {

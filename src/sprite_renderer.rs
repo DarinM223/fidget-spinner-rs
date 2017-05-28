@@ -1,10 +1,9 @@
-use cgmath::{Deg, Vector2, Vector3, Matrix4, Transform};
+use cgmath::{Deg, Vector2, Vector3, Matrix4};
 use cgmath::prelude::*;
 use gl;
 use gl::types::*;
 use shader::Shader;
 use std::mem;
-use std::ops::Mul;
 use std::ptr;
 use texture::Texture;
 
