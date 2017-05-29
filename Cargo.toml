@@ -1,7 +1,10 @@
 [package]
-name = "fidget-spinner-rs"
-version = "0.1.0"
+name = "fidget-spinner"
+version = "0.0.1"
 authors = ["Darin Minamoto <darinm223@gmail.com>"]
+description = "Simple OpenGL wrapper"
+readme = "README.md"
+license = "MIT"
 
 [dependencies]
 gl = "0.6.0"
@@ -9,3 +12,11 @@ glutin = "0.8"
 png = "0.7"
 cgmath = "0.14"
 time = "0.1"
+
+[lib]
+name = "fidget_spinner"
+path = "src/lib.rs"
+
+[[bin]]
+name = "fidget_spinner_bin"
+path = "src/bin.rs"

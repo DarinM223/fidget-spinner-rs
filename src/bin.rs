@@ -1,22 +1,15 @@
 extern crate cgmath;
+extern crate fidget_spinner;
 extern crate gl;
-extern crate glutin;
-extern crate png;
 extern crate time;
-
-#[macro_use]
-mod debug;
-mod shader;
-mod sprite_renderer;
-mod texture;
+extern crate glutin;
 
 use cgmath::{Vector2, Vector3};
-use debug::gl_check;
 use gl::types::*;
-use shader::Shader;
-use sprite_renderer::{RenderOptions, SpriteRenderer};
+use fidget_spinner::shader::Shader;
+use fidget_spinner::sprite_renderer::{RenderOptions, SpriteRenderer};
 use std::env;
-use texture::{Dimensions, Texture, TextureOptions};
+use fidget_spinner::texture::{Dimensions, Texture, TextureOptions};
 
 pub const SPINNER_WIDTH: f32 = 500.;
 pub const SPINNER_HEIGHT: f32 = 500.;
