@@ -6,6 +6,7 @@ extern crate glutin;
 
 use cgmath::{Vector2, Vector3};
 use gl::types::*;
+use glutin::GlContext;
 use fidget_spinner::shader::Shader;
 use fidget_spinner::sprite_renderer::{RenderOptions, SpriteRenderer};
 use std::env;
@@ -48,16 +49,15 @@ fn main() {
         }
     };
 
-    let events_loop = glutin::EventsLoop::new();
-    let window = glutin::WindowBuilder::new()
-        .with_dimensions(800, 600)
-        .build(&events_loop)
-        .unwrap();
-    unsafe { window.make_current() }.unwrap();
+    let mut events_loop = glutin::EventsLoop::new();
+    let context = glutin::ContextBuilder::new();
+    let window = glutin::WindowBuilder::new().with_dimensions(800, 600);
+    let gl_window = glutin::GlWindow::new(window, context, &events_loop).unwrap();
+    let _ = unsafe { gl_window.make_current() };
 
-    gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
+    gl::load_with(|symbol| gl_window.get_proc_address(symbol) as *const _);
 
-    let (width, height) = window.get_inner_size_pixels().unwrap();
+    let (width, height) = gl_window.get_inner_size_pixels().unwrap();
     let projection = cgmath::ortho(0., width as GLfloat, height as GLfloat, 0., -1., 1.);
     let shader = Shader::from_files("./shaders/sprite.vs.glsl", "./shaders/sprite.frag.glsl")
         .unwrap();
@@ -103,25 +103,26 @@ fn main() {
         }
 
         renderer.draw(&texture, &render_opts);
-        window.swap_buffers().unwrap();
+        gl_window.swap_buffers().unwrap();
 
         events_loop.poll_events(|event| {
             match event {
                 glutin::Event::WindowEvent { event, .. } => {
                     match event {
-                        glutin::WindowEvent::MouseInput(glutin::ElementState::Pressed, ..) => {
+                        glutin::WindowEvent::MouseInput { state: glutin::ElementState::Pressed, .. } => {
                             if !pressed {
                                 pressed = true;
                                 spinning = !spinning;
                             }
                         }
-                        glutin::WindowEvent::MouseInput(glutin::ElementState::Released, ..) => {
+                        glutin::WindowEvent::MouseInput { state: glutin::ElementState::Released, .. } => {
                             pressed = false;
                         }
                         glutin::WindowEvent::Closed => running = false,
                         _ => {}
                     }
                 }
+                _ => {}
             }
         });
     }
