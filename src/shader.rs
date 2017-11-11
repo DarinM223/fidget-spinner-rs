@@ -35,8 +35,9 @@ pub struct Shader {
 
 impl Shader {
     pub fn new<'a, 'b, A, B>(vertex_src: A, fragment_src: B) -> Result<Shader>
-        where A: Into<Cow<'a, str>>,
-              B: Into<Cow<'b, str>>
+    where
+        A: Into<Cow<'a, str>>,
+        B: Into<Cow<'b, str>>,
     {
         let vertex_src = vertex_src.into();
         let fragment_src = fragment_src.into();
@@ -49,8 +50,9 @@ impl Shader {
     }
 
     pub fn from_files<'a, 'b, A, B>(vertex_path: A, fragment_path: B) -> Result<Shader>
-        where A: Into<Cow<'a, str>>,
-              B: Into<Cow<'a, str>>
+    where
+        A: Into<Cow<'a, str>>,
+        B: Into<Cow<'a, str>>,
     {
         let vertex_path: &str = &vertex_path.into();
         let fragment_path: &str = &fragment_path.into();
@@ -116,7 +118,12 @@ unsafe fn compile_shader(shader_type: ShaderType, source: &str) -> Result<u32> {
     gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut success);
     if success != (gl::TRUE as GLint) {
         let mut buf = Vec::with_capacity(512 - 1);
-        gl::GetShaderInfoLog(shader, 512, ptr::null_mut(), buf.as_mut_ptr() as *mut GLchar);
+        gl::GetShaderInfoLog(
+            shader,
+            512,
+            ptr::null_mut(),
+            buf.as_mut_ptr() as *mut GLchar,
+        );
         let info_log = String::from_utf8(buf).unwrap();
         return Err(ShaderErr::CompileErr(shader_type, info_log));
     }
@@ -134,7 +141,12 @@ unsafe fn link_program(vertex_shader: u32, fragment_shader: u32) -> Result<u32> 
     gl::GetProgramiv(program, gl::LINK_STATUS, &mut success);
     if success != (gl::TRUE as GLint) {
         let mut buf = Vec::with_capacity(512 - 1);
-        gl::GetProgramInfoLog(program, 512, ptr::null_mut(), buf.as_mut_ptr() as *mut GLchar);
+        gl::GetProgramInfoLog(
+            program,
+            512,
+            ptr::null_mut(),
+            buf.as_mut_ptr() as *mut GLchar,
+        );
         let info_log = String::from_utf8(buf).unwrap();
         return Err(ShaderErr::LinkErr(info_log));
     }

@@ -40,7 +40,8 @@ pub struct Texture {
 
 impl Texture {
     pub fn new<'a, S>(path: S, dim: Dimensions, opts: TextureOptions) -> Texture
-        where S: Into<Cow<'a, str>>
+    where
+        S: Into<Cow<'a, str>>,
     {
         let path: &str = &path.into();
 
@@ -58,15 +59,17 @@ impl Texture {
         unsafe {
             gl::GenTextures(1, &mut texture);
             gl::BindTexture(gl::TEXTURE_2D, texture);
-            gl::TexImage2D(gl::TEXTURE_2D,
-                           0,
-                           opts.internal_format,
-                           width as i32,
-                           height as i32,
-                           0,
-                           opts.image_format,
-                           gl::UNSIGNED_BYTE,
-                           buf.as_ptr() as *const c_void);
+            gl::TexImage2D(
+                gl::TEXTURE_2D,
+                0,
+                opts.internal_format,
+                width as i32,
+                height as i32,
+                0,
+                opts.image_format,
+                gl::UNSIGNED_BYTE,
+                buf.as_ptr() as *const c_void,
+            );
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, opts.wrap_s);
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, opts.wrap_t);
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, opts.filter_min);

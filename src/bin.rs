@@ -1,8 +1,8 @@
 extern crate cgmath;
 extern crate fidget_spinner;
 extern crate gl;
-extern crate time;
 extern crate glutin;
+extern crate time;
 
 use cgmath::{Vector2, Vector3};
 use gl::types::*;
@@ -59,8 +59,8 @@ fn main() {
 
     let (width, height) = gl_window.get_inner_size_pixels().unwrap();
     let projection = cgmath::ortho(0., width as GLfloat, height as GLfloat, 0., -1., 1.);
-    let shader = Shader::from_files("./shaders/sprite.vs.glsl", "./shaders/sprite.frag.glsl")
-        .unwrap();
+    let shader =
+        Shader::from_files("./shaders/sprite.vs.glsl", "./shaders/sprite.frag.glsl").unwrap();
     shader.use_program();
     shader.set_int("image", 0);
     shader.set_mat4("projection", projection);
@@ -72,8 +72,10 @@ fn main() {
     let renderer = SpriteRenderer::new(&shader);
 
     let mut render_opts = RenderOptions {
-        position: Vector2::new(width as f32 / 2. - SPINNER_WIDTH / 2.,
-                               height as f32 / 2. - SPINNER_HEIGHT / 2.),
+        position: Vector2::new(
+            width as f32 / 2. - SPINNER_WIDTH / 2.,
+            height as f32 / 2. - SPINNER_HEIGHT / 2.,
+        ),
         size: Vector2::new(SPINNER_WIDTH, SPINNER_HEIGHT),
         rotate: 0.,
         color: Vector3::new(0., 1., 0.),
@@ -105,25 +107,25 @@ fn main() {
         renderer.draw(&texture, &render_opts);
         gl_window.swap_buffers().unwrap();
 
-        events_loop.poll_events(|event| {
-            match event {
-                glutin::Event::WindowEvent { event, .. } => {
-                    match event {
-                        glutin::WindowEvent::MouseInput { state: glutin::ElementState::Pressed, .. } => {
-                            if !pressed {
-                                pressed = true;
-                                spinning = !spinning;
-                            }
-                        }
-                        glutin::WindowEvent::MouseInput { state: glutin::ElementState::Released, .. } => {
-                            pressed = false;
-                        }
-                        glutin::WindowEvent::Closed => running = false,
-                        _ => {}
-                    }
+        events_loop.poll_events(|event| match event {
+            glutin::Event::WindowEvent { event, .. } => match event {
+                glutin::WindowEvent::MouseInput {
+                    state: glutin::ElementState::Pressed,
+                    ..
+                } => if !pressed {
+                    pressed = true;
+                    spinning = !spinning;
+                },
+                glutin::WindowEvent::MouseInput {
+                    state: glutin::ElementState::Released,
+                    ..
+                } => {
+                    pressed = false;
                 }
+                glutin::WindowEvent::Closed => running = false,
                 _ => {}
-            }
+            },
+            _ => {}
         });
     }
 }
